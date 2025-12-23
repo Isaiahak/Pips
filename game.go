@@ -4,6 +4,7 @@ import(
 "fmt"
 "math/rand"
 )
+
 type Piece struct {
 	id int
 	s1 int
@@ -27,36 +28,6 @@ type CurrentPiece struct {
 	id int 
 }
 
-func main(){
-	pieces, board := createGame("small")
-
-
-	fmt.Println(pieces)
-
-	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board); j++ {
-			fmt.Print( board[i][j].pieceId, " ")
-		}
-		fmt.Println("")	
-	}
-
-	fmt.Println("-----------------------------------------")
-	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board); j++ {
-			fmt.Print( board[i][j].pieceValue, " ")
-		}
-		fmt.Println("")	
-	}
-
-	fmt.Println("-----------------------------------------")
-	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board); j++ {
-			fmt.Print( board[i][j].modifier, " ")
-		}
-		fmt.Println("")	
-	}
-
-}
 
 func createGame(size string) ([]Piece, [][]BoardSquare){
 	var pieces []Piece
@@ -89,7 +60,7 @@ func createGame(size string) ([]Piece, [][]BoardSquare){
 		fmt.Print("invalid size!")
 	}
 
-	//board = addConditions(board)
+	board = addConditions(board)
 
 	return pieces, board
 
@@ -150,6 +121,7 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 	for j := 0; j < len(board); j ++ {
 		for i := 0; i < len(board); i++ {
 			board[j][i].pieceValue = -1
+			board[j][i].modifier = "None"
 		}
 	}
 
@@ -226,22 +198,9 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 		}
 	}
 
-	fmt.Println(pieceMap)
-
-	fmt.Println("initial board")
-
-	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board); j++ {
-			fmt.Print( board[j][i].pieceId, " ")
-		}
-		fmt.Println("")	
-	}
-
-	//place pieces
 	for true{
-		fmt.Println("start of loop")
-		fmt.Println("current: ",current.id, ", s1", current.s1, ",s2", current.s2, ", x1", current.x1,", y1", current.y1, ", x2", current.x2, ", y2", current.y2)
-		var vp1, vp2 []int
+		var placement []int
+
 		placedSide := rand.Intn(1)
 		var x, y, s1 int
 		if placedSide == 0 {
@@ -254,17 +213,35 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 			y = current.y2
 		}
 
+		potentialPlacements := findPotentialPlacements(x, y, board)
 
-		// we need to find a valid place for a piece then we pick, re-write check position
-		vp1 = checkPositions(x, y, board)
-		if result == false {
-			vp1 = findNewSpot()
+		// find a place for a piece
+		if len(potentialPlacements) > 0 {
+			rand.Shuffle(len(potentialPlacements), func(i, j int) {
+				potentialPlacements[i], potentialPlacements[j] = potentialPlacements[j], potentialPlacements[i]
+			})
+			placement = potentialPlacements[0]
+		} else {
+			for i := 0; i < len(board); i ++ {
+				for j := 0; j < len(board); j++ {
+					if board[j][i].filled == true {
+						potentialPlacements := findPotentialPlacements(i,j, board)
+						if len(potentialPlacements) > 0 {
+							rand.Shuffle(len(potentialPlacements), func(i, j int) {
+								potentialPlacements[i], potentialPlacements[j] = potentialPlacements[j], potentialPlacements[i]
+							})
+							placement = potentialPlacements[0]
+							break
+						}
+					}
+				}
+			}
 		}
 
+		// find a piece to put in the place
 		var piece Piece
-		if len(pieceMap[s1]) > 0 {
+		if len(pieceMap[s1]) > 0  && rand.Float64() < 0.75{
 			piece = pieceMap[s1][0]
-			fmt.Println(piece, s1)
 			if len(pieceMap[s1]) == 1{
 				pieceMap[s1] = nil
 			} else {
@@ -281,7 +258,6 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 				}
 
 				pieces = pieceMap[value]
-				fmt.Println(pieces, value, len(pieces))
 
 				var remove int
 				for index, p := range pieces{
@@ -289,14 +265,14 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 						remove = index
 					}
 				}
-				if len(pieces) == 1 {
+				if len(pieceMap[value]) == 1 {
 					pieceMap[value] = nil
 				} else if remove == len(pieces) - 1{
-					pieceMap[value] = pieces[0:remove]
+					pieceMap[value] = pieceMap[value][0:remove]
 				} else if remove == 0 {
-					pieceMap[value] = pieces[1:]	
+					pieceMap[value] = pieceMap[value][1:]	
 				} else {
-					pieceMap[value] = append(pieces[0:remove],pieces[remove+1:]...)
+					pieceMap[value] = append(pieceMap[value][0:remove],pieceMap[value][remove+1:]...)
 				}
 			} 
 		}else {
@@ -327,11 +303,11 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 						if len(list) == 1 {
 							pieceMap[value] = nil
 						} else if remove == 0 {
-							pieceMap[value] = pieces[1:]
+							pieceMap[value] = pieceMap[value][1:]
 						} else if remove == len(list) - 1 {
-							pieceMap[value] = pieces[0:remove]
+							pieceMap[value] = pieceMap[value][0:remove]
 						} else {
-							pieceMap[value] = append(pieces[0:remove],pieces[remove+1:]...)
+							pieceMap[value] = append(pieceMap[value][0:remove],pieceMap[value][remove+1:]...)
 						}
 					}
 					break
@@ -339,17 +315,13 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 			}
 		}
 
-		board[vp1[1]][vp1[0]].pieceId = piece.id
-		board[vp1[1]][vp1[0]].pieceValue = piece.s1
-		board[vp1[1]][vp1[0]].filled = true
+		board[placement[1]][placement[0]].pieceId = piece.id
+		board[placement[1]][placement[0]].pieceValue = piece.s1
+		board[placement[1]][placement[0]].filled = true
 		
 		current.s1 = piece.s1
-		current.x1 = vp1[0]
-		current.y1 = vp1[1]
-
-		vp2, result = checkPositions(vp1[0],vp1[1], board)
-
-		fmt.Println("after check2")
+		current.x1 = placement[0]
+		current.y1 = placement[1]
 
 		var pv int
 		if piece.s1 == s1 {
@@ -358,22 +330,14 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 			pv  = piece.s1
 		}
 
-		board[vp2[1]][vp2[0]].pieceId = piece.id
-		board[vp2[1]][vp2[0]].pieceValue = pv
-		board[vp2[1]][vp2[0]].filled = true
+		board[placement[3]][placement[2]].pieceId = piece.id
+		board[placement[3]][placement[2]].pieceValue = pv
+		board[placement[3]][placement[2]].filled = true
 
 		current.s2 = piece.s2
-		current.x2 = vp2[0]
-		current.y2 = vp2[1]
+		current.x2 = placement[2]
+		current.y2 = placement[3]
 		current.id = piece.id
-
-		fmt.Println("current: ",current.id, ", s1", current.s1, ",s2", current.s2, ", x1", current.x1,", y1", current.y1, ", x2", current.x2, ", y2", current.y2)
-		for i := 0; i < len(board); i++ {
-			for j := 0; j < len(board); j++ {
-				fmt.Print( board[i][j].pieceId, " ")
-			}
-			fmt.Println("")	
-		}
 
 		var count int
 		for _, pieces := range pieceMap{
@@ -385,15 +349,13 @@ func createBoard(size int, pieces []Piece) [][]BoardSquare{
 		if count == len(pieceMap){
 			break
 		}
-		fmt.Println("end of loop") 
 	}
 
 	return board
 
 }
 
-func checkPositions(x int, y int, board [][]BoardSquare) (validPosition []int, result bool){
-	var validPositions [][]int
+func checkPositions(x int, y int, board [][]BoardSquare) (validPositions [][]int){
 	if x + 1 < len(board){
 		if board[y][x+1].filled == false{
 			position := []int{x+1,y}
@@ -419,52 +381,47 @@ func checkPositions(x int, y int, board [][]BoardSquare) (validPosition []int, r
 			validPositions = append(validPositions, position)
 		}
 	}
+	return validPositions
 
-	rand.Shuffle(len(validPositions), func(i, j int){
-		validPositions[i], validPositions[j] = validPositions[j], validPositions[i]
-	})
-	if len(validPositions) > 0 {
-		validPosition = validPositions[0]
-		result = true
-	} else {
-		validPosition = []
-		result = false
-	}
-	return validPosition, result
 }
 
-func addConditions(board [][]BoardSquare) ([][]BoardSquare){
-	var x, y int
-	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board); j++ {
-			if board[i][j].filled == true{
-				x = i
-				y = j
-				break
+func findPotentialPlacements(x,y int, board [][]BoardSquare) (potentialPlacements [][]int){
+	positions := checkPositions(x, y, board)
+	for _, position := range positions{
+		orientations := checkPositions(position[0],position[1], board)
+		if len(orientations) > 0 {
+			for _,orientation := range orientations{
+				placement := []int{position[0],position[1],orientation[0],orientation[1]}
+				potentialPlacements = append(potentialPlacements, placement)
 			}
 		}
 	}
+	return potentialPlacements
 
-	var modless [][]int
+}
 
+func addConditions(board [][]BoardSquare) ([][]BoardSquare){
 	// first pass is to create equal relationships
-	var currentX, currentY = x, y
-	initial := 0.9
-	for true {
-		if rand.Float64() < initial {
-			pieces := checkForEqual(currentX, currentY, board, modless)
 
-			mod := fmt.Sprintf("= %d", board[currentX][currentY].pieceValue)
-			board[currentX][currentY].modifier = mod
-			for _, piece := range pieces {
-				if board[piece[0]][piece[1]].modifier == "" {
-					board[piece[0]][piece[0]]. modifier = mod
-				}
+	visited := make(map[int]bool)
+	for i := 0; i < len(board); i ++ {
+		for j := 0; j < len(board); j++ {
+			if board[j][i].filled == true && visited[board[j][i].pieceId] == false{
+				pieces := checkForEqual(j,i,board)
+				mod := fmt.Sprintf("= %d", board[j][i].pieceValue )
+				if len(pieces) > 0 {
+					for _, piece := range pieces {
+						if board[piece[0]][piece[1]].modifier == "" {
+							board[piece[0]][piece[1]].modifier = mod
+							visited[board[piece[0]][piece[1]].pieceId] = true
+						}
+					}
+				}	
+				board[j][i].modifier = mod
+				visited[board[j][i].pieceId] = true
+
 			}
-
-			initial -= 0.2
-		} 
-		// we need a break or exit condition
+		}
 	}
 
 
@@ -472,7 +429,7 @@ func addConditions(board [][]BoardSquare) ([][]BoardSquare){
 	return board
 }
 
-func checkForEqual(x, y int, board[][]BoardSquare, modless [][]int) (piecePositions [][]int){
+func checkForEqual(x, y int, board[][]BoardSquare) (piecePositions [][]int){
 	if x + 1 < len(board) - 1 {
 		if board[y][x+1].filled == true && board[x+1][y].pieceValue == board[x][y].pieceValue{
 			piece := []int{x+1, y}
@@ -501,4 +458,5 @@ func checkForEqual(x, y int, board[][]BoardSquare, modless [][]int) (piecePositi
 		}
 	}
 	return piecePositions
+
 }

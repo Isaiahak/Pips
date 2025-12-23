@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Home</title>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary: #d946ef;   
+      --color-secondary: #fdf4ff; 
+      --color-tertiary: #1b0f24;  
+      --color-border: #a855f7;    
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="http://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+  <div id="main" htmx-get="/home-page" hx-trigger="load" hx-swap="outerHTML"></div>
+</html>
