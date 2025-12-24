@@ -1,39 +1,30 @@
-<div class="min-h-screen bg-gradient-to-b from-slate-900 to-black flex items-center justify-center text-white">
+<div id="home-page" class="min-h-screen bg-gradient-to-b from-slate-900 to-black flex items-center justify-center text-white">
 
   <div class="bg-white/5 backdrop-blur-md rounded-2xl p-8 w-80 text-center shadow-xl">
     <h1 class="text-3xl font-bold mb-2">My Game</h1>
     <p class="text-slate-400 mb-8">Select Difficulty</p>
 
-    <div class="flex flex-col gap-4">
+    <div id="button-div" class="flex flex-col gap-4">
       <button
-      	id="small" name="difficulty" value="small" htmx-get="/create-game" htmx-trigger="click" htmx-target="#main" htmx-swap="outerHTML"
+      	id="small" name="difficulty" value="small" hx-get="/create-game" hx-trigger="click" hx-target="#main" hx-swap="innerHTML"
        	class="py-3 rounded-xl bg-green-500 hover:bg-green-400 transition font-semibold"
       >
         Small
       </button>
 
       <button
-      	id="medium" name="difficulty"  value="medium" htmx-get="/create-game" htmx-trigger="click" htmx-target="#main" htmx-swap="outerHTML"
+      	id="medium" name="difficulty"  value="medium" hx-get="/create-game" hx-trigger="click" hx-target="#main" hx-swap="innerHTML"
         class="py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 transition font-semibold"
       >
         Medium
       </button>
 
       <button
-      	id="large" name="difficulty" value="large" htmx-get="/create-game" htmx-trigger="click" htmx-target="#main" htmx-swap="outerHTML"
+      	id="large" name="difficulty" value="large" hx-get="/create-game" hx-trigger="click" hx-target="#main" hx-swap="innerHTML"
         class="py-3 rounded-xl bg-red-500 hover:bg-red-400 transition font-semibold"
       >
         Large
       </button>
     </div>
   </div>
-
-  <script>
-  `
-	document.getElementById("small").addEventListener("on-click", () => createGame("small"))
-  	document.getElementById("medium").addEventListener("on-click", () => createGame("medium"))
-	document.getElementById("large").addEventListener("on-click", () => createGame("large"))
-  `
-  </script>
-
 </div>

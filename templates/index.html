@@ -15,5 +15,60 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="http://unpkg.com/htmx.org@1.9.10"></script>
 </head>
-  <div id="main" htmx-get="/home-page" hx-trigger="load" hx-swap="outerHTML"></div>
+<header>
+</header>
+<body>
+    <div id="main" hx-get="/home-page" hx-trigger="load" hx-swap="innerHTML"></div>
+  <script>
+    function createGame(){
+      console.log("button clicked")
+    }
+
+    function handlePieceClick(piece){
+      if (currentPiece == null){
+        console.log("turning on")
+        piece.classList.toggle("rotate-90");
+        currentPiece = piece
+      } else {
+        if (currentPiece == piece) {
+          console.log("turning off")
+          piece.classList.toggle("rotate-90")
+          currentPiece = null
+        } else {
+          console.log("turning off and change")
+          currentPiece.classList.toggle("rotate-90")
+          piece.classList.toggle("rotate-90")
+          currentPiece = piece
+        }
+      }
+    }
+
+    let currentPiece = null
+    let pieces = null
+
+    document.addEventListener('htmx:afterSwap', (event) => {
+      switch (event.target.children[0].id){
+        case "home-page":
+          smallButton = event.target.querySelector("#small")
+          smallButton.addEventListener("click", () => createGame())
+          mediumButton = event.target.querySelector("#medium")
+          mediumButton.addEventListener("click", () => createGame())
+          largeButton = event.target.querySelector("#large")
+          largeButton.addEventListener("click", () => createGame())
+        break
+        case "game":
+          pieces = event.target.querySelectorAll('[id^="piece-"]')
+          pieces.forEach(piece => {
+            piece.addEventListener("click", () => handlePieceClick(piece))
+          })
+          
+        break
+      }
+    })
+  </script>
+</body>
+<footer>
+    <license class="ml-16 opacity-70 "> 
+    | Designed by Isaiah Ashton-Kenny | All rights reserved.</license>
+</footer>
 </html>
