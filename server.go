@@ -24,16 +24,16 @@ var templates = template.Must(template.ParseGlob("./templates/*.html"))
 
 var pieceTemplate string =
 `
-<div id="piece-%d"class="w-8 h-16 bg-white rounded-md 
-transform transition-transform duration-300 ease-in-out p-1 rotate-0 flex flex-col overflow-hidden shadow-lg">
+<div draggable="true" id="piece-%d"class="w-8 h-16 bg-white rounded-md 
+ transition-transform duration-300 ease-in-out p-1 rotate-0 flex flex-col overflow-hidden shadow-lg">
   
-  <div class="flex-1 grid grid-cols-3 grid-rows-3 place-items-center">
+  <div name="piece-1" class="flex-1 grid grid-cols-3 grid-rows-3 place-items-center">
     %s
   </div>
 
   <div class="h-[2px] bg-white/5 mx-auto"></div>
 
-  <div class="flex-1 grid grid-cols-3 grid-rows-3 place-items-center">
+  <div name="piece-2" class="flex-1 grid grid-cols-3 grid-rows-3 place-items-center">
     %s
   </div>
 
@@ -42,7 +42,7 @@ transform transition-transform duration-300 ease-in-out p-1 rotate-0 flex flex-c
 
 var puzzleBoardTemplate string = 
 `
-<div id="puzzleBoard" class="w-full h-full gap-2 bg-white/5 rounded-xl p-2 self-center grid grid-cols-%d grid-rows-%d">
+<div id="puzzle-board" class="w-full h-full gap-2 bg-white/5 rounded-xl p-2 self-center grid grid-cols-%d grid-rows-%d">
 %s
 </div>
 `
@@ -66,7 +66,7 @@ var gameTemplate string =
 	<div id="board" class="w-[%s] h-[%s] rounded-sm mx-auto flex mb-12">
 		%s
 	</div>
-	<div id="pieces" class="w-90 h-full mx-auto gap-8 flex">
+	<div id="pieces" class="w-90 h-full mx-auto gap-12 flex">
 		%s
 	</div>
 </div>

@@ -25,26 +25,56 @@
     }
 
     function handlePieceClick(piece){
-      if (currentPiece == null){
-        console.log("turning on")
-        piece.classList.toggle("rotate-90");
+      if (currentPiece == null){ 
+        if (!piece.classList.contains("scale-125")){
+          piece.classList.toggle("scale-125")
+        }
         currentPiece = piece
-      } else {
+      } else { 
         if (currentPiece == piece) {
-          console.log("turning off")
-          piece.classList.toggle("rotate-90")
-          currentPiece = null
+          if (piece.classList.contains("rotate-90")){
+            piece.classList.replace("rotate-90","rotate-180")
+          } else if (piece.classList.contains("rotate-180")){
+            piece.classList.replace("rotate-180","rotate-270")
+          } else if (piece.classList.contains("rotate-270")){
+            piece.classList.replace("rotate-270","rotate-360")
+          } else if (piece.classList.contains("rotate-360")){
+            piece.classList.replace("rotate-360", "rotate-90")
+          } else {
+            piece.classList.toggle("rotate-90")
+          }
         } else {
-          console.log("turning off and change")
-          currentPiece.classList.toggle("rotate-90")
-          piece.classList.toggle("rotate-90")
+          currentPiece.classList.toggle("scale-125")
+          piece.classList.toggle("scale-125")
           currentPiece = piece
         }
       }
     }
+    
+
+    function handlePieceDrag(piece){
+      piece.classList.toggle("scale-110")
+      console.log(piece.getBoundingClientRect())
+    }
+
+    function handlePieceRelease(piece){
+      board_dimensions = board.getBoundingClientRect()
+      piece_dimensions = piece.getBoundingClientRect()
+      piece_x = piece_dimensions.x
+      piece_y = piece_dimensions.y 
+
+      if (piece_x >= board_dimensions.x && piece_x <= board_dimensions.x + board_dimensions.width && piece_y >= board_dimensions.y && piece_y <= board_dimensions.y + board_dimensions.height){
+        console.log("placment time")
+      } else {
+        console.log("we gucci")
+      }
+      piece.classList.toggle("scale-110")
+    }
+    
 
     let currentPiece = null
     let pieces = null
+    let board = null
 
     document.addEventListener('htmx:afterSwap', (event) => {
       switch (event.target.children[0].id){
@@ -57,18 +87,21 @@
           largeButton.addEventListener("click", () => createGame())
         break
         case "game":
+          board = event.target.querySelector("#puzzle-board")
           pieces = event.target.querySelectorAll('[id^="piece-"]')
           pieces.forEach(piece => {
             piece.addEventListener("click", () => handlePieceClick(piece))
-          })
-          
+            piece.addEventListener("mousedown", () => handlePieceDrag(piece))
+            piece.addEventListener("mouseup", () => handlePieceRelease(piece))
+          })  
         break
       }
     })
+
   </script>
 </body>
 <footer>
     <license class="ml-16 opacity-70 "> 
-    | Designed by Isaiah Ashton-Kenny | All rights reserved.</license>
+     Designed by Isaiah Ashton-Kenny | All rights reserved.</license>
 </footer>
 </html>
